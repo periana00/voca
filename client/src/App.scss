@@ -1,0 +1,48 @@
+.words {
+    width:100%;
+    user-select: none;
+    table {
+        border-collapse: collapse;
+    }
+
+    thead {
+        text-align: left;
+        border-bottom: 2px solid #aaa;
+        button {
+            // display: block;
+            box-sizing: content-box;
+            border: none;
+            background-color: inherit;
+            color: inherit;
+            width: 1em;
+            height: 1em;
+            line-height: 1em;
+        }
+    }
+    tbody {
+        tr {
+            &:hover {
+                box-shadow: 0 0 5px 0 #aaa;
+            }
+            &:nth-child(10n) {
+                border-bottom: 2px dotted #aaa;
+            }
+            td {
+    
+                &.mean {
+                    opacity: 0;
+                    &.active {
+                        opacity: 1;
+                    }
+                }
+                &.checked {
+                    color: green;
+                }
+                &.passed {
+                    color: #ddd;
+                }
+            }
+        }
+    
+    }
+}

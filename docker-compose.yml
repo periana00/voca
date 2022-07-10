@@ -1,0 +1,17 @@
+services:
+  api:
+    build: 
+      context: api/
+    volumes:
+      - "./api:/app"
+  client:
+    build: client/
+    volumes:
+      - "/app/node_modules"
+      - "./client:/app"
+    ports:
+      - "3001:3001"
+    depends_on:
+      - api
+      
+# $ docker-compose down --rmi all --volumes
