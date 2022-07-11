@@ -1,8 +1,16 @@
 .words {
+    -webkit-tap-highlight-color: transparent;
     width:100%;
     user-select: none;
-    table {
+    input {
+        width: 4em;
+    }
+    table {    
+        width:100%;
         border-collapse: collapse;
+        th, td {
+            padding:0.5em;
+        }
     }
 
     thead {
@@ -14,24 +22,23 @@
             border: none;
             background-color: inherit;
             color: inherit;
-            width: 1em;
-            height: 1em;
+            font-size: 1em;
             line-height: 1em;
         }
     }
     tbody {
         tr {
-            &:hover {
-                box-shadow: 0 0 5px 0 #aaa;
-            }
-            &:nth-child(10n) {
-                border-bottom: 2px dotted #aaa;
+            &.first {
+                border-top: 2px dotted #aaa;
             }
             td {
-    
+                &:first-child:active {
+                    background-color: #ddd;
+                }
                 &.mean {
                     opacity: 0;
-                    &.active {
+                    &:active {
+                        // box-shadow: 0 0 5px 0 #aaa;
                         opacity: 1;
                     }
                 }
@@ -39,8 +46,30 @@
                     color: green;
                 }
                 &.passed {
-                    color: #ddd;
+                    color: transparent;
                 }
+                img {
+                    box-sizing: content-box;
+                    width:1.2em;
+                    height:1.2em;
+                }
+            }
+        }
+
+        button {
+            display: block;
+            box-sizing: content-box;
+            border: none;
+            background-color: inherit;
+            color: inherit;
+            width: 1em;
+            height: 1em;
+            line-height: 1em;
+            // border: 2px solid transparent;
+            border-radius: 0.5em;
+            &:active {
+                // box-shadow: 0 0 5px 0 #aaa inset;
+                // border: 2px solid #aaa; 
             }
         }
     

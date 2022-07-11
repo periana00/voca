@@ -29,7 +29,6 @@ const config = {
 
 function App() {
     const [words, setWords] = useState([]);
-    const [src, setSrc] = useState(null)
 
     useEffect(() => {
         const { start, end, random } = config
@@ -55,10 +54,6 @@ function App() {
     }
 
     const play = word => e => {
-        e.target.classList.add('active');
-        setTimeout(() => {
-            e.target.classList.remove('active');
-        }, 1000);
         const a = document.querySelector('#tts')
         a.src = '/audio/' + word + '.mp3'
         a.play()
@@ -85,23 +80,59 @@ function App() {
                 e.target.textContent = '⬇'
             })
         }
+    };
+
+    const changeStart = e => {
+        config.start = e.target.value*1
+    }
+    const changeEnd = e => {
+        config.end = e.target.value*1
     }
 
+    
+
+    const reload = e => {
+        if (sortLock) return
+        sortLock = true
+        const { start, end, random } = config
+        axios.post('/api/get', { start, end, random, sort:0  }).then(res => {
+            setWords(res.data.words);
+            sortLock = false;
+        });
+    }
+
+    console.log(words);
+
+    let last = null
+    let count = 0
     return (
         <div className="words">
             <audio preload="true" id='tts'></audio>
+            <div>
+                <input defaultValue={config.start} onChange={changeStart} onBlur={reload}></input>
+                <input defaultValue={config.end} onChange={changeEnd} onBlur={reload}></input>
+            </div>
             <table>
                 <thead>
                     <tr>
+                        <th></th>
+                        <th></th>
                         <th><span>단어</span><button onClick={sortWords}>{config.random ? '🔀' : '⬇'}</button></th>
                         <th>의미</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {words.map(row => <tr key={row.id}>
-                        <td className={row.passed ? 'word checked passed' : row.checked ? 'word checked' : 'word'} onClick={check(row.id)}>{row.word}</td>
-                        <td className='mean' onMouseDown={play(row.word)} onTouchStart={play(row.word)} onTouchEnd={e => e.preventDefault()}>{row.bundle}</td>
-                    </tr>)}
+                    {words.map(row => {
+                        if (!last || last != row.bundle) count++
+                        const el = <tr key={row.id} className={!last || last != row.bundle ? 'first' : null}>
+                            {!last || last != row.bundle ? <td rowSpan={row.count}>{count}</td> : null}
+                            <td><button onClick={play(row.word)}><img src='image/speaker.png' /></button></td>
+                            <td className={row.passed ? 'word checked passed' : row.checked ? 'word checked' : 'word'} onClick={check(row.id)}>{row.word}</td>
+                            {!last || last != row.bundle ? <td className='mean' rowSpan={row.count}>{row.bundle}</td> : null}
+                        </tr>
+                        last = row.bundle
+                        return el
+                    })}
                 </tbody>
             </table>
         </div>

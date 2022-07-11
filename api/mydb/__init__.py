@@ -29,7 +29,7 @@ class Word:
             self.cur.execute('''
             INSERT INTO seq (id) 
                 SELECT id FROM (
-                    SELECT bundle, row_number() OVER(ORDER BY random()) AS seq 
+                    SELECT bundle, row_number() OVER(ORDER BY random()) AS seq
                     FROM words
                     GROUP BY bundle
                     ) b
@@ -47,9 +47,10 @@ class Word:
 
     def get(self, subchapter_start, subchapter_end, random=0) :
         self.connect()
+        print(self.cur.execute('select * from seq left join words on seq.id=words.id').fetchone())
         if random :
             param = '''
-            SELECT s.id, chapter, subchapter, bundle, class, word, mean, checked, passed
+            SELECT s.id, chapter, subchapter, bundle, class, word, mean, checked, passed, count
             FROM seq s
             LEFT JOIN words w
             ON s.id = w.id
@@ -57,7 +58,7 @@ class Word:
             '''
         else :
             param = '''
-            SELECT id, chapter, subchapter, bundle, class, word, mean, checked, passed
+            SELECT id, chapter, subchapter, bundle, class, word, mean, checked, passed, count
             FROM words
             WHERE subchapter BETWEEN ? AND ?
             '''
