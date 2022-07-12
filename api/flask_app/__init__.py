@@ -14,7 +14,7 @@ def create_app() :
         print(params)
         if params['sort'] :
             w.sort()
-        return {'words': w.get(params['start'], params['end'], params['random']), 'time': time.time() - start}
+        return {'words': w.get(params['subchapter']), 'time': time.time() - start}
 
     @app.route('/api/check/<id>')
     def check(id) :

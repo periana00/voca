@@ -26,17 +26,21 @@ class Word:
         try :
             self.connect()
             self.cur.execute('DELETE FROM seq')
+            # self.cur.execute('''
+            # INSERT INTO seq (id) 
+            #     SELECT id FROM (
+            #         SELECT bundle, row_number() OVER(ORDER BY random()) AS seq
+            #         FROM words
+            #         GROUP BY bundle
+            #         ) b
+            #     LEFT JOIN words w
+            #     ON b.bundle = w.bundle
+            #     ORDER BY b.seq, random()
+            # ''').fetchall()
             self.cur.execute('''
-            INSERT INTO seq (id) 
-                SELECT id FROM (
-                    SELECT bundle, row_number() OVER(ORDER BY random()) AS seq
-                    FROM words
-                    GROUP BY bundle
-                    ) b
-                LEFT JOIN words w
-                ON b.bundle = w.bundle
-                ORDER BY b.seq, random()
-            ''').fetchall()
+                INSERT INTO seq (id)
+                    SELECT id FROM words ORDER BY random()
+            ''')
             self.con.commit()
             self.disconnect()
             return True
@@ -45,24 +49,16 @@ class Word:
             self.disconnect()
             return False
 
-    def get(self, subchapter_start, subchapter_end, random=0) :
+    def get(self, subchapter) :
         self.connect()
-        print(self.cur.execute('select * from seq left join words on seq.id=words.id').fetchone())
-        if random :
-            param = '''
-            SELECT s.id, chapter, subchapter, bundle, class, word, mean, checked, passed, count
-            FROM seq s
-            LEFT JOIN words w
-            ON s.id = w.id
-            WHERE subchapter BETWEEN ? AND ?
-            '''
-        else :
-            param = '''
-            SELECT id, chapter, subchapter, bundle, class, word, mean, checked, passed, count
-            FROM words
-            WHERE subchapter BETWEEN ? AND ?
-            '''
-        self.cur.execute(param, (subchapter_start, subchapter_end))
+        query = '''
+        SELECT s.id, chapter, subchapter, bundle, class, word, mean, checked, passed, count
+        FROM seq s
+        LEFT JOIN words w
+        ON s.id = w.id
+        WHERE subchapter=?
+        '''
+        self.cur.execute(query, (subchapter, ))
         result = self.cur.fetchall()
         self.disconnect()
         return result

@@ -1,4 +1,10 @@
 .words {
+    header {
+        font-size:1.2em;
+        * {
+            margin-right: 0.2em;
+        }
+    }
     -webkit-tap-highlight-color: transparent;
     width:100%;
     user-select: none;
@@ -9,7 +15,17 @@
         width:100%;
         border-collapse: collapse;
         th, td {
+            &:nth-child(1), &:nth-child(2), &:nth-child(3) {
+                width: 1%;
+                padding: 0 0.5em;
+                white-space: nowrap;
+            }
+            &:nth-child(2):active {
+                background-color: #aaa;
+            }
+            border-right: 1px dotted #aaa;
             padding:0.5em;
+            padding-right: 0;
         }
     }
 
@@ -36,6 +52,7 @@
                     background-color: #ddd;
                 }
                 &.mean {
+                    width: 50%;
                     opacity: 0;
                     &:active {
                         // box-shadow: 0 0 5px 0 #aaa;

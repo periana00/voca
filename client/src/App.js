@@ -6,38 +6,30 @@ import { Cookies } from 'react-cookie';
 const cookies = new Cookies();
 
 const config = {
-    get random() {
-        return cookies.get('random')*1 || 0
+    get subchapter() {
+        return cookies.get('subchapter')*1 || 1
     },
-    get start() {
-        return cookies.get('start')*1 || 1
+    set subchapter(val) {
+        cookies.set('subchapter', val);
     },
-    get end() { 
-        return cookies.get('end')*1 || 1
-    },
-    set random(val) {
-        cookies.set('random', val);
-    },
-    set start(val) {
-        cookies.set('start', val);
-    },
-    set end(val) {
-        cookies.set('end', val);
-    }
 }
 
 
 function App() {
     const [words, setWords] = useState([]);
+    let lock = false
 
     useEffect(() => {
-        const { start, end, random } = config
-        axios.post('/api/get', { start, end, random, sort:0 } ).then(res => {
+        const { subchapter } = config
+        axios.post('/api/get', { subchapter, sort:0 } ).then(res => {
             setWords(res.data.words);
         });
     },[])
 
+
     const check = id => e => {
+        if (lock) return
+        lock = true
         axios.get('/api/check/' + id).then(res => {
             if (res.status == 200) {
                 if (e.target.classList.contains('checked')) {
@@ -50,6 +42,7 @@ function App() {
                     e.target.classList.add('checked')
                 }
             }
+            lock = false
         })
     }
 
@@ -59,76 +52,60 @@ function App() {
         a.play()
     }
 
-    let sortLock = false
     const sortWords = e => {
-        if (sortLock) return
-        sortLock = true
-        if (e.target.textContent == '⬇') {
-            config.random = 1;
-            const { start, end, random} = config
-            axios.post('/api/get', { start, end, random, sort:1  }).then(res => {
-                setWords(res.data.words);
-                sortLock = false
-                e.target.textContent = '🔀';
-            })
-        } else if (e.target.textContent == '🔀') {
-            config.random = 0;
-            const { start, end, random } = config;
-            axios.post('/api/get', { start, end, random, sort:0 }).then(res => {
-                setWords(res.data.words);
-                sortLock = false
-                e.target.textContent = '⬇'
-            })
-        }
+        if (lock) return
+        lock = true
+        const { subchapter } = config
+        axios.post('/api/get', { subchapter, sort:1  }).then(res => {
+            setWords(res.data.words);
+            lock = false;
+        })
     };
 
-    const changeStart = e => {
-        config.start = e.target.value*1
-    }
-    const changeEnd = e => {
-        config.end = e.target.value*1
-    }
-
-    
-
-    const reload = e => {
-        if (sortLock) return
-        sortLock = true
-        const { start, end, random } = config
-        axios.post('/api/get', { start, end, random, sort:0  }).then(res => {
+    const changeChapter = direction => e => {
+        if (lock) return
+        lock = true
+        let { subchapter } = config;
+        if (config.subchapter*1 + direction < 0) return 
+        config.subchapter = subchapter*1 + direction
+        axios.post('/api/get', { subchapter: subchapter*1 + direction, sort:0  }).then(res => {
             setWords(res.data.words);
-            sortLock = false;
+            lock = false;
         });
     }
-
-    console.log(words);
 
     let last = null
     let count = 0
     return (
         <div className="words">
             <audio preload="true" id='tts'></audio>
-            <div>
-                <input defaultValue={config.start} onChange={changeStart} onBlur={reload}></input>
-                <input defaultValue={config.end} onChange={changeEnd} onBlur={reload}></input>
-            </div>
+            <header>
+                <span>챕터: {config.subchapter}</span>
+                <button onClick={changeChapter(1)}>⬆️</button>
+                <button onClick={changeChapter(-1)}>⬇️</button>
+                <button onClick={sortWords}>🔃</button>
+                <div>주제:{words.length ? words[0]['class'] : null}</div>
+            </header>
             <table>
                 <thead>
                     <tr>
                         <th></th>
                         <th></th>
-                        <th><span>단어</span><button onClick={sortWords}>{config.random ? '🔀' : '⬇'}</button></th>
+                        <th>단어</th>
                         <th>의미</th>
                     </tr>
                 </thead>
                 <tbody>
                     {words.map(row => {
-                        if (!last || last != row.bundle) count++
-                        const el = <tr key={row.id} className={!last || last != row.bundle ? 'first' : null}>
-                            {!last || last != row.bundle ? <td rowSpan={row.count}>{count}</td> : null}
+                        // if (!last || last != row.bundle) count++
+                        // const el = <tr key={row.id} className={!last || last != row.bundle ? 'first' : null}>
+                        const el = <tr key={row.id}>
+                            {/* {!last || last != row.bundle ? <td rowSpan={row.count}>{count}</td> : null} */}
+                            <td>{++count}</td>
                             <td><button onClick={play(row.word)}><img src='image/speaker.png' /></button></td>
                             <td className={row.passed ? 'word checked passed' : row.checked ? 'word checked' : 'word'} onClick={check(row.id)}>{row.word}</td>
-                            {!last || last != row.bundle ? <td className='mean' rowSpan={row.count}>{row.bundle}</td> : null}
+                            {/* {!last || last != row.bundle ? <td className='mean' rowSpan={row.count}>{row.bundle}</td> : null} */}
+                            <td className='mean'>{row.bundle}</td>
                         </tr>
                         last = row.bundle
                         return el

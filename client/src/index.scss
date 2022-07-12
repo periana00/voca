@@ -3,6 +3,15 @@ ul, li {
   margin:none;
   list-style-type: none;
 }
+button {
+  font-size: inherit;
+  padding:0;
+  margin:0;
+  background-color: inherit;
+  color: inherit;
+  border: none;
+  box-sizing: content-box;
+}
 
 body {
   margin: 0;
