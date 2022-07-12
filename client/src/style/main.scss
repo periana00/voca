@@ -1,0 +1,70 @@
+
+.main {
+    table {
+        width:100%;
+        border-collapse: collapse;
+        font-size:1.2em;
+    }
+
+    tr {
+        
+        // background-color: #dfd;
+        background-color: #fff;
+        // color: #bbb;
+
+        &.theme { 
+            // background-color: #ddf;
+            td.hidden {
+                // color: #ddf;
+            }
+        }
+
+        &.focused {
+            background-color: #777;
+            td.hidden {
+                color: #777;
+            }
+        }
+
+
+        th {
+            border-bottom: 2px solid #333;
+        }
+
+        &:nth-child(10n) td {
+            border-bottom: 2px solid #333;
+        }
+
+        td {
+            // border-bottom: 2px solid #333;
+
+            &:first-child {
+                text-align: right;
+                border-right: 2px solid #333;
+                width:1%;
+                white-space: nowrap;
+            }
+            &:nth-child(2) {
+                border-right: 2px solid #333;
+                width:1%;
+                white-space: nowrap;
+            }
+
+
+            &.hidden {
+                // color:#dfd;
+                color:#fff;
+                &:active {
+                    color:inherit;
+                }
+            }
+            &.passed {
+                // color: #ccc;
+                color: #ddd;
+            }
+            &.checked {
+                color: #0a0;
+            }
+        }
+    }
+}

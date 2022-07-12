@@ -1,0 +1,21 @@
+// 초기화
+body {
+    width:100%;
+    user-select: none;
+    -webkit-user-select : none; 
+    &::-webkit-scrollbar {
+        display: none; /* Chrome, Safari, Opera*/
+    }
+    * {
+        -webkit-tap-highlight-color:transparent;
+    }
+    background-color: #333;
+}
+
+button {
+    background-color: none;
+    border: none;
+    padding:none;
+    margin:none;
+    border-radius: 10px;
+}

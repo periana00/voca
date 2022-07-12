@@ -1,0 +1,18 @@
+version: '3.9'
+
+services:
+  webpack:
+    container_name: webpack
+    build: .
+    volumes:
+      - .:/usr/src/app
+    command: sh -c "npm install && npm start"
+    # command: npm start
+  server:
+    container_name: server
+    build: .
+    volumes:
+      - ./:/usr/src/app
+    ports:
+      - "3000:3000"
+    command: npm run server
