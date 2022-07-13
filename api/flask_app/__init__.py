@@ -13,7 +13,7 @@ def create_app() :
         params = request.get_json()
         print(params)
         if params['sort'] :
-            w.sort()
+            w.sort(params['start'], params['end'])
         return {'words': w.get(params['start'], params['end'], params['random']), 'time': time.time() - start}
 
     @app.route('/api/check/<id>')

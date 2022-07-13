@@ -24,7 +24,8 @@ class Word:
             self.con.close()
             self.con = None
 
-    def sort(self) :
+    def sort(self, start, end) :
+        if start == end : end = start + 1
         try :
             self.connect()
             # self.cur.execute('DELETE FROM seq')
@@ -41,7 +42,7 @@ class Word:
             # ''').fetchall()
             self.cur.execute('DELETE FROM seq')
             for row in self.cur.execute('SELECT class, bundle, count FROM words GROUP BY class, bundle ORDER BY random()').fetchall() :
-                noise = self.cur.execute('SELECT id, chapter, subchapter, word, mean, bundle, class, checked, passed, ? as count FROM words WHERE class = ? AND bundle != ? ORDER BY random() LIMIT 1', (row['count'] + 1, row['class'], row['bundle'])).fetchone()
+                noise = self.cur.execute('SELECT id, chapter, subchapter, word, mean, bundle, class, checked, passed, ? as count FROM words WHERE class != ? AND bundle != ? AND subchapter BETWEEN ? AND ? ORDER BY random() LIMIT 1', (row['count'] + 1, row['class'], row['bundle'], start, end)).fetchone()
                 noise['bundle'] = f'{row["bundle"]}<br>{noise["word"]}: {noise["bundle"]}'
                 words = self.cur.execute('SELECT id, chapter, subchapter, word, mean, ? as bundle, class, checked, passed, ? as count FROM words WHERE class = ? AND bundle = ? ORDER BY random()', (noise['bundle'], row['count'] + 1, row['class'], row['bundle'])).fetchall()
                 words.insert(random.randint(0, row['count']), noise)
