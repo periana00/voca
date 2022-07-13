@@ -123,14 +123,14 @@ function App() {
                 </thead>
                 <tbody>
                     {words.map(row => {
-                        if (!last || last != row.bundle) count++
-                        const el = <tr key={row.id} className={!last || last != row.bundle ? 'first' : null}>
-                            {!last || last != row.bundle ? <td rowSpan={row.count}>{count}</td> : null}
-                            <td><button onClick={play(row.word)}><img src='image/speaker.png' /></button></td>
+                        if (!last || last[0] != row.bundle || last[1] != row.class) count++
+                        const el = <tr key={row.id + row.bundle} className={!last || last[0] != row.bundle || last[1] != row.class ? 'first' : null}>
+                            {/* 번호 */!last || last[0] != row.bundle || last[1] != row.class ? <td rowSpan={row.count}>{count}</td> : null}
+                            {/* 음성 */<td><button onClick={play(row.word)}><img src='image/speaker.png' /></button></td>}
                             <td className={row.passed ? 'word checked passed' : row.checked ? 'word checked' : 'word'} onClick={check(row.id)}>{row.word}</td>
-                            {!last || last != row.bundle ? <td className='mean' rowSpan={row.count}>{row.bundle}</td> : null}
+                            {!last || last[0] != row.bundle || last[1] != row.class ? <td className='mean' rowSpan={row.count} dangerouslySetInnerHTML={{__html: row.bundle}}></td> : null}
                         </tr>
-                        last = row.bundle
+                        last = [row.bundle, row.class]
                         return el
                     })}
                 </tbody>
