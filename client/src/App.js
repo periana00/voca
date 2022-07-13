@@ -74,6 +74,16 @@ function App() {
         });
     }
 
+    const reset = e => {
+        if (lock) return
+        lock = true
+        let { subchapter } = config;
+        axios.post('/api/reset', { subchapter }).then(res => {
+            setWords(res.data.words);
+            lock = false;
+        })
+    }
+
     let last = null
     let count = 0
     return (
@@ -84,6 +94,7 @@ function App() {
                 <button onClick={changeChapter(1)}>⬆️</button>
                 <button onClick={changeChapter(-1)}>⬇️</button>
                 <button onClick={sortWords}>🔃</button>
+                <button onClick={reset}>🆕</button>
                 <div>주제:{words.length ? words[0]['class'] : null}</div>
             </header>
             <table>

@@ -11,7 +11,6 @@ def create_app() :
     def get() :
         start = time.time()
         params = request.get_json()
-        print(params)
         if params['sort'] :
             w.sort()
         return {'words': w.get(params['subchapter']), 'time': time.time() - start}
@@ -20,6 +19,14 @@ def create_app() :
     def check(id) :
         w.check(id)
         return 'ok'
+
+    @app.route('/api/reset', methods=['POST'])
+    def reset() :
+        start = time.time()
+        params = request.get_json()
+        w.sort(False)
+        w.reset(params['subchapter'])
+        return {'words': w.get(params['subchapter']), 'time': time.time() - start}
 
     return app
 

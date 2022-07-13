@@ -22,7 +22,7 @@ class Word:
             self.con.close()
             self.con = None
 
-    def sort(self) :
+    def sort(self, random=True) :
         try :
             self.connect()
             self.cur.execute('DELETE FROM seq')
@@ -37,10 +37,13 @@ class Word:
             #     ON b.bundle = w.bundle
             #     ORDER BY b.seq, random()
             # ''').fetchall()
-            self.cur.execute('''
-                INSERT INTO seq (id)
-                    SELECT id FROM words ORDER BY random()
-            ''')
+            if random :
+                self.cur.execute('''
+                    INSERT INTO seq (id)
+                        SELECT id FROM words ORDER BY random()
+                ''')
+            else :
+                self.cur.execute('INSERT INTO seq (id) SELECT id FROM words')
             self.con.commit()
             self.disconnect()
             return True
@@ -67,7 +70,6 @@ class Word:
         try :
             self.connect()
             dic = self.cur.execute('SELECT checked, passed FROM words WHERE id=?', (id, )).fetchone()
-            print(dic)
             if dic['checked'] :
                 if dic['passed'] :
                     self.cur.execute('UPDATE words SET checked=0, passed=0 WHERE id=?', (id, ))
@@ -75,6 +77,18 @@ class Word:
                     self.cur.execute('UPDATE words SET passed=1 WHERE id=?', (id, ))
             else :
                 self.cur.execute('UPDATE words SET checked=1 WHERE id=?', (id, ))
+            self.con.commit()
+            self.disconnect()
+            return True
+        except :
+            self.con.rollback()
+            self.disconnect()
+            return False
+    
+    def reset(self, subchapter) :
+        self.connect()
+        try :
+            self.cur.execute('UPDATE words SET checked=0, passed=0 WHERE subchapter=?', (subchapter, ))
             self.con.commit()
             self.disconnect()
             return True
