@@ -29,12 +29,12 @@ class Word:
             self.cur.execute('''
             INSERT INTO seq (id) 
                 SELECT id FROM (
-                    SELECT bundle, row_number() OVER(ORDER BY random()) AS seq
+                    SELECT bundle, row_number() OVER(ORDER BY random()) AS seq, class
                     FROM words
-                    GROUP BY bundle
+                    GROUP BY class, bundle
                     ) b
                 LEFT JOIN words w
-                ON b.bundle = w.bundle
+                ON b.bundle = w.bundle AND b.class = w.class
                 ORDER BY b.seq, random()
             ''').fetchall()
             self.con.commit()
