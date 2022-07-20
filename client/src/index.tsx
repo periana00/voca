@@ -9,15 +9,13 @@ import './index.scss';
 
 const root = createRoot(document.querySelector('#root') as Element)
 root.render(
-    <React.StrictMode>
-        <BrowserRouter>
-            <Routes>
-                <Route path="/" element={<Main />} />
-                <Route path="/" element={<App />}>
-                    <Route path="101" element={<Word101 />} />
-                    <Route path="301" element={<Word301 />} />
-                </Route>
-            </Routes>
-        </BrowserRouter>
-    </React.StrictMode>
+    <BrowserRouter>
+        <Routes>
+            <Route path="/" element={<Main />} />
+            <Route path="/" element={<App />}>
+                <Route path="101" element={<Word101 />} />
+                <Route path="301" element={<Word301 />} />
+            </Route>
+        </Routes>
+    </BrowserRouter>
 )

@@ -3,21 +3,25 @@ html, body {
     margin: 0;
     width: 100%;
     height: 100%;
+    user-select: none;
+    -webkit-user-select : none;
 }
 
 a {
     text-decoration: none;
     color:inherit;
-    user-select: none;
-}
-
-label {
-    user-select: none;
 }
 
 input {
     box-sizing: content-box;
     font-size: inherit;
+    border-radius: 0;
+    border: none;
+}
+
+button {
+    border: none;
+    box-sizing:content-box;
 }
 
 #root {

@@ -1,14 +1,20 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import axios from 'axios';
+// import './index.scss';
+import { useOutletContext } from "react-router-dom";
 
-import { Cookies, useCookies } from 'react-cookie';
-
-export default function word301() {
-    const [cookies, setCookies] = useCookies();
-    console.log(cookies);
+export default function word101(props: any) {
+    const [words, setWords]: any = useOutletContext();
+    useEffect(() => {
+        axios.get('api/get').then(({data}) => {
+            console.log(data);
+            setWords(data)
+        })
+    }, []);
 
     return (
-        <div>
-            301
+        <div className="word-301">
+            
         </div>
     )
 }

@@ -1,0 +1,44 @@
+table {
+    width: 100%;
+    border-spacing: 0;
+    th {
+        border-top: 2px solid #aaa;
+        border-bottom: 2px solid #aaa;
+        border-right: 2px solid #aaa;
+    }
+    tr:nth-child(10n - 5) td {
+        border-bottom: 2px dotted #aaa;
+    }
+    tr:nth-child(10n) td {
+        border-bottom: 2px solid #aaa;
+    }
+    td {
+        border-right: 2px solid #aaa;
+    }
+
+    .selected {
+        background-color: cyan;
+    }
+
+    .index, .word {
+        width: 1%;
+        padding: 0 0.5em;
+        white-space: nowrap;
+        &.checked {
+            color: green;
+        }
+        &.passed {
+            color: rgba(0,0,0,0);
+        }
+    }
+    .word {
+        user-select: text;
+        -webkit-user-select : text;
+    }
+    .mean {
+        color: rgba(0,0,0,0);
+        &:active {
+            color: inherit;
+        }
+    }
+}

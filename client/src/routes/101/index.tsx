@@ -1,11 +1,9 @@
 import React, { useEffect, useState } from "react";
 import axios from 'axios';
-import Header from './header';
-import Main from './main';
-import './index.scss';
+import { useOutletContext } from "react-router-dom";
 
-export default function word101() {
-    const [words, setWords] = useState({config: {start:1, end:1}, words: []});
+export default function word101(props: any) {
+    const [words, setWords]: any = useOutletContext();
     useEffect(() => {
         axios.get('api/get').then(({data}) => {
             console.log(data);
@@ -15,8 +13,7 @@ export default function word101() {
 
     return (
         <div className="word-101">
-            <Header config={words.config} setWords={setWords}/>
-            <Main words={words.words}/>
+            
         </div>
     )
 }

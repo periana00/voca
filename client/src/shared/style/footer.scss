@@ -1,0 +1,28 @@
+.controller {
+    position: sticky;
+    display: flex;
+    bottom:0;
+    input {
+        flex: none;
+        width: 10vh;
+        text-align: center;
+    }
+    div {
+        display: flex;
+        flex-direction: column;
+        & button {
+            flex:1;
+        }
+    }
+    > * {
+        height: 10vh;
+        flex:1;
+        border-top: 2px solid #aaa;
+        border-right: 2px solid #aaa;
+    }
+    * {
+        display: block;
+        margin: 0;
+        padding: 0;
+    }
+}
