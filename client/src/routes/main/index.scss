@@ -1,0 +1,21 @@
+.main {
+    height: 100%;
+    nav {
+        display: flex;
+        height: 100%;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        a {
+            margin: 1em;
+            padding: 1em;
+            border: 1px solid #ddd;
+            border-radius: 1em;
+            width:30vw;
+            text-align: center;
+            &:hover {
+                box-shadow: 0 0 5px 0 #aaa;
+            }
+        }
+    }
+}
