@@ -1,7 +1,14 @@
 header {
     position: sticky;
     top:0;
+    display:flex;
     input {
-        width: 5em;
+        width: 2em;
+        border: 1px solid #aaa;
+        margin-left: 2px;
+        outline: none;
+    }
+    button {
+        font-size: 12px;
     }
 }

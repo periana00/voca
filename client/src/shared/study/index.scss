@@ -4,8 +4,13 @@
     height: 100%;
     background-color: rgba(0,0,0,0.5);
     z-index:1;
+    font-size: 16px;
     button {
         background:#fff;
+        font-size: inherit;
+    }
+    input {
+        font-size: inherit;
     }
     .no { background-color: #f00; }
     .yes { background-color: #0f0; }
@@ -16,6 +21,7 @@
         background-color: #fff;
         padding:0.5em;
         position: relative;
+        width:80vw;
         .progress {
             position: absolute;
             top:0;
@@ -29,6 +35,12 @@
                 background-color: cyan;
             }
         }
+        .content {
+            text-align: center;
+        }
     }
 
+    .toogle {
+        display: none;
+    }
 }

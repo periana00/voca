@@ -12,11 +12,12 @@ export default function App(props: any) {
 
     return (
         <>
-            <Study study={study} setStudy={setStudy} />
-            <Header config={words.config} setWords={setWords} setStudy={setStudy}/>
+            <Study study={study} setStudy={setStudy} setWords={setWords} />
+            <Header config={words.config} setWords={setWords}>
+                <Outlet context={[ words, setWords, study, setStudy ]} />
+            </Header>
             <Main words={words.words} index={index} />
             <Footer words={words.words} index={index} setIndex={setIndex} />
-            <Outlet context={[words, setWords]} />
         </>
     )
 }

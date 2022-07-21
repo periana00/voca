@@ -40,7 +40,12 @@ def reset_word(id) :
     w.reset_word(id)
     return 'ok'
 
-@app.route('/api/study')
-def study() :
+@app.route('/api/choose_mean')
+def choose_mean() :
     path = request.referrer.split('/')[-1]
-    return jsonify(w.test2({'path': path}))
+    return jsonify(w.choose_mean({'path': path}))
+
+@app.route('/api/antonym_word')
+def antonym_word() :
+    path = request.referrer.split('/')[-1]
+    return jsonify(w.antonym_word({'path': path}))

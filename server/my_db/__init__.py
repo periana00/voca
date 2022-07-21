@@ -88,7 +88,7 @@ class Word :
         self.cur.execute('UPDATE seq SET status=(case when(status==2) then 0 else status+1 end) WHERE id=?', (id, ))
         return True
 
-    def test(self, params, word) :
+    def get_wrong_means(self, params, word) :
         chapter = 'chapter' if params['path'] == '101' else 'subchapter'
         mean = 'mean' if params['path'] == '101' else 'bundle'
         wordmean = word['mean'] if params['path'] == '101' else word['bundle']
@@ -106,13 +106,13 @@ class Word :
         return {'word': word, 'words': words}
 
     @connect
-    def test2(self, params) :
+    def choose_mean(self, params) :
         params = self.cur.execute('SELECT * FROM config WHERE path=:path', params).fetchone()
         chapter = 'chapter' if params['path'] == '101' else 'subchapter'
         result = []
         words = self.cur.execute(f'SELECT * FROM seq WHERE {chapter} BETWEEN :start AND :end AND status<2', params).fetchall()
         for word in words :
-            result.append(self.test(params, word))
+            result.append(self.get_wrong_means(params, word))
         return result
 
     @connect
@@ -120,3 +120,23 @@ class Word :
         self.cur.execute('UPDATE words SET status=0 WHERE id=?', (id,))
         self.cur.execute('UPDATE seq SET status=0 WHERE id=?', (id,))
         return True
+
+    @connect
+    def antonym_word(self, params) :
+        params = self.cur.execute('SELECT * FROM config WHERE path=:path', params).fetchone()
+        chapter = 'chapter' if params['path'] == '101' else 'subchapter'
+        words = self.cur.execute(f'SELECT * FROM seq WHERE {chapter} BETWEEN :start AND :end AND status<2', params).fetchall()
+        questions = []
+        # 추후 섞기에 대한 확인 필요?
+        random.shuffle(words)
+        for word in words :
+            questions.append(self.question_antonym_get_words(word))
+        return questions
+
+
+    # 중심단어(답) 1, 반의어(문제, 오답) 1 + 3
+    def question_antonym_get_words(self, word) :
+        # 반의어 찾기(중심 단어가 답), 난이도 쉬움
+        words = self.cur.execute('select * from words where class = :class and category != :category order by random() limit 4', word).fetchall()
+        words.insert(random.randint(1, 4), word)
+        return words

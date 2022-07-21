@@ -6,7 +6,7 @@ function check_can_pass(index: number, data: any) {
     if (index % 10 != 9 && index != data.length - 1) return 1;
     const start = index - index % 10;
     const end = index + 1;
-    for (let {word} of data.slice(start, end)) {
+    for (let word of data.slice(start, end)) {
         // 못 맞춘 단어가 있는 경우 10으로 나눈 나머지만큼 감소
         if (!word.status) return -(index%10);
     }
@@ -14,8 +14,7 @@ function check_can_pass(index: number, data: any) {
     return index == data.length - 1 ? false : 1;
 }
 
-
-export default function Choose_mean(props: any) {
+export default function Answer_mean(props: any) {
     const { study, index, setIndex } = props;
 
     let lock = false;
@@ -31,76 +30,59 @@ export default function Choose_mean(props: any) {
             el = document.querySelector('.over');
             if (el) el.classList.remove('over');
         }
-    })
-
-    const check = (ans: any, word: any) => (e: any) => {
-        if (lock) return;
-        lock=true;
-        clearTimeout(timeout);
-        if (ans.word != word.word) {
-            e.target.classList.add('no');
-            (document.querySelector('.ans') as Element).classList.add('over');
-            timeout = setTimeout(() => {
-                ans.status = 0;
-                axios.get('api/reset/' + ans.id).then(data => {
-                    const result = check_can_pass(index, study.data)
-                    if (result) {
-                        setIndex(index + result)
-                    } else {
-                        // 끝나고 결과 보여 줘야 함
-                    }
-                })
-            }, 500)
-        }
-        else {
-            e.target.classList.add('yes');
-            timeout = setTimeout(() => {
-                if (ans.status < 2) {
-                    ans.status += 1;
-                    axios.get('api/check/' + ans.id).then(data => {
-                        const result = check_can_pass(index, study.data)
-                        if (result) {
-                            setIndex(index + result)
-                        } else {
-                            // 끝나고 결과 보여 줘야 함
-                        }
-                    });
-                } else {
-                    const result = check_can_pass(index, study.data)
-                    if (result) {
-                        setIndex(index + result)
-                    } else {
-                        // 끝나고 결과 보여 줘야 함
-                    }
-                }
-            }, 500)
-        }
-    }
-
-
-    const {words, word} = study.data[index];
-
-    timeout = setTimeout(() => {
-        lock = true;
-        (document.querySelector('.ans') as Element).classList.add('over');
-        timeout = setTimeout(() => {
-            word.status = 0;
-            axios.get('api/reset/' + word.id).then(data => {
-                const result = check_can_pass(index, study.data)
-                if (result) {
-                    setIndex(index + result)
-                } else {
-                    // 끝나고 결과 보여 줘야 함
-                }
-            })
-        }, 500)
-    }, 2500)
+    });
 
     const move = (val: number) => (e:any) => {
         if (index + val >= 0 && index + val < study.data.length) {
             setIndex(index + val);
         }
-    }
+    };
+
+
+    const words = study.data[index];
+
+    const check = (q: any, a: any) => (e: any) => {
+        if (lock) return
+        lock = true
+        if (q.category == a.category) { // 반의어가 아니므로 오답
+            e.target.classList.add('no');        
+            (document.querySelector('.ans') as Element).classList.add('over');
+            timeout = setTimeout(() => {
+                axios.get('api/reset/' + a.id).then(data => {
+                    const result = check_can_pass(index, study.data);
+                    if (result) {
+                        setIndex(index + result)
+                    }
+                })
+            }, 500);
+        } else {
+            e.target.classList.add('yes');
+            timeout = setTimeout(() => {
+                axios.get('api/check/' + a.id).then(data => {
+                    const result = check_can_pass(index, study.data);
+                    if (result) {
+                        setIndex(index + result)
+                    }
+                })
+            }, 500);
+        }
+    };
+
+    
+    timeout = setTimeout(() => {
+        if (lock) return;
+        lock = true;
+        (document.querySelector('.ans') as Element).classList.add('over');
+        timeout = setTimeout(() => {
+            let a = words.find((v:any) => v.category != words[0].category);
+            axios.get('api/reset/' + a.id).then(data => {
+                const result = check_can_pass(index, study.data);
+                if (result) {
+                    setIndex(index + result)
+                }
+            })
+        }, 500);
+    }, 3000);
 
     return (
         <div className="content">
@@ -108,8 +90,8 @@ export default function Choose_mean(props: any) {
                 <button onClick={move(-(index%10 || 10))}>이전</button>
                 <button onClick={move(10-(index%10))}>다음</button>
             </div>
-            <h2>{word.word}</h2>
-            {words.map((v:any) => <h3 key={v.id} className={word.word == v.word ? 'ans' : undefined} onClick={check(word, v)}>{v.bundle || v.mean}</h3>)}
+            <h2>{words[0].word}</h2>
+            {words.slice(1).map((v:any) => <h3 key={v.id} className={words[0].category != v.category ? 'ans' : undefined} onClick={check(words[0], v)}>{v.word}</h3>)}
         </div>
     )
 }
