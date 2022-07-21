@@ -33,8 +33,9 @@ export default function Footer(props: any) {
     }
 
     const look = (e:any) => {
+        
         const audio = document.createElement('audio');
-        audio.src = '/media/' + words[index-1].chapter + '/' + words[index-1].id + '.mp3';
+        audio.src = '/media/word/' + words[index-1].word + '.mp3';
         audio.play();
     }
 
