@@ -40,6 +40,7 @@ export default function Choose_mean(props: any) {
         if (ans.word != word.word) {
             e.target.classList.add('no');
             (document.querySelector('.ans') as Element).classList.add('over');
+            (document.querySelector('.voice-mean') as HTMLAudioElement).play();
             timeout = setTimeout(() => {
                 ans.status = 0;
                 axios.get('api/reset/' + ans.id).then(data => {
@@ -50,7 +51,7 @@ export default function Choose_mean(props: any) {
                         // 끝나고 결과 보여 줘야 함
                     }
                 })
-            }, 500)
+            }, 1000)
         }
         else {
             e.target.classList.add('yes');
@@ -73,7 +74,7 @@ export default function Choose_mean(props: any) {
                         // 끝나고 결과 보여 줘야 함
                     }
                 }
-            }, 500)
+            }, 300)
         }
     }
 
@@ -83,6 +84,7 @@ export default function Choose_mean(props: any) {
     timeout = setTimeout(() => {
         lock = true;
         (document.querySelector('.ans') as Element).classList.add('over');
+        (document.querySelector('.voice-mean') as HTMLAudioElement).play();
         timeout = setTimeout(() => {
             word.status = 0;
             axios.get('api/reset/' + word.id).then(data => {
@@ -93,7 +95,7 @@ export default function Choose_mean(props: any) {
                     // 끝나고 결과 보여 줘야 함
                 }
             })
-        }, 500)
+        }, 1000)
     }, 2500)
 
     const move = (val: number) => (e:any) => {
@@ -102,8 +104,11 @@ export default function Choose_mean(props: any) {
         }
     }
 
+
     return (
         <div className="content">
+            <audio className="voice-word" style={{display:"none"}} src={'/media/word/' + word.word + '.mp3'} autoPlay={true}></audio>
+            <audio className="voice-mean" style={{display:"none"}} src={word.bundle ? '/media/bundle/' + word.bundle + '.mp3' : '/media/mean/' + word.mean + '.mp3'} autoPlay={false}></audio>
             <div>
                 <button onClick={move(-(index%10 || 10))}>이전</button>
                 <button onClick={move(10-(index%10))}>다음</button>
