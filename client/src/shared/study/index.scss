@@ -1,0 +1,34 @@
+.study {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    z-index:1;
+    button {
+        background:#fff;
+    }
+    .no { background-color: #f00; }
+    .yes { background-color: #0f0; }
+    .over { background-color: #ff0; }
+
+    .board {
+        margin:auto;
+        background-color: #fff;
+        padding:0.5em;
+        position: relative;
+        .progress {
+            position: absolute;
+            top:0;
+            left:0;
+            width:100%;
+            height:4px;
+            background-color: inherit;
+            > div {
+                width:0;
+                height: 100%;
+                background-color: cyan;
+            }
+        }
+    }
+
+}

@@ -34,3 +34,13 @@ def reset() :
 def check(id) :
     w.check(id)
     return 'ok'
+
+@app.route('/api/reset/<id>')
+def reset_word(id) :
+    w.reset_word(id)
+    return 'ok'
+
+@app.route('/api/study')
+def study() :
+    path = request.referrer.split('/')[-1]
+    return jsonify(w.test2({'path': path}))

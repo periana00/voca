@@ -1,5 +1,6 @@
 import sqlite3
 import os
+import random
 DB_PATH = os.path.join(os.path.dirname(__file__), 'word.db')
 
 con = sqlite3.connect(DB_PATH)
@@ -85,4 +86,37 @@ class Word :
     def check(self, id) :
         self.cur.execute('UPDATE words SET status=(case when(status==2) then 0 else status+1 end) WHERE id=?', (id, ))
         self.cur.execute('UPDATE seq SET status=(case when(status==2) then 0 else status+1 end) WHERE id=?', (id, ))
+        return True
+
+    def test(self, params, word) :
+        chapter = 'chapter' if params['path'] == '101' else 'subchapter'
+        mean = 'mean' if params['path'] == '101' else 'bundle'
+        wordmean = word['mean'] if params['path'] == '101' else word['bundle']
+        words = self.cur.execute(f'''
+        SELECT * FROM words 
+        WHERE 
+            {chapter} BETWEEN ? AND ?
+            AND 
+            {mean} != ?
+            AND
+            status<2
+        ORDER BY random() 
+        LIMIT 4''', (params['start'], params['end'], wordmean)).fetchall()
+        words.insert(random.randint(0, 4), word)
+        return {'word': word, 'words': words}
+
+    @connect
+    def test2(self, params) :
+        params = self.cur.execute('SELECT * FROM config WHERE path=:path', params).fetchone()
+        chapter = 'chapter' if params['path'] == '101' else 'subchapter'
+        result = []
+        words = self.cur.execute(f'SELECT * FROM seq WHERE {chapter} BETWEEN :start AND :end AND status<2', params).fetchall()
+        for word in words :
+            result.append(self.test(params, word))
+        return result
+
+    @connect
+    def reset_word(self, id) :
+        self.cur.execute('UPDATE words SET status=0 WHERE id=?', (id,))
+        self.cur.execute('UPDATE seq SET status=0 WHERE id=?', (id,))
         return True
