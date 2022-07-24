@@ -1,97 +1,145 @@
 import React, { useState, useEffect } from "react";
+import { getIndex, useConfig, Bar, BarContainer } from "../../utils";
 import axios from 'axios';
 
-function check_can_pass(index: number, data: any) {
-    // 10번째 단어가 아니고 마지막 단어도 아닌 경우 1 증가
-    if (index % 10 != 9 && index != data.length - 1) return 1;
-    const start = index - index % 10;
-    const end = index + 1;
-    for (let word of data.slice(start, end)) {
-        // 못 맞춘 단어가 있는 경우 10으로 나눈 나머지만큼 감소
-        if (!word.status) return -(index%10);
-    }
-    // 다 맞춘 경우 1 증가, 마지막이면 false 반환
-    return index == data.length - 1 ? false : 1;
-}
+export default function Antonym_word(props: any) {
+    const { data, config, setConfig } = props;
+    let { answer, words } = config.index == -1 ? data[0] : data[config.index];
+    const question = words[0];
+    words = words.slice(1);
 
-export default function Answer_mean(props: any) {
-    const { study, index, setIndex } = props;
 
-    let lock = false;
-    let timeout: any = null;
-
+    // 처음 화면(실행) -> 답 보여줌 -> 다음 화면(실행) -> 답 보여줌 -> 다음 화면(실행) -> ....
     useEffect(() => {
-        return () => {
-            clearTimeout(timeout);
-            let el = document.querySelector('.no');
-            if (el) el.classList.remove('no');
-            el = document.querySelector('.yes');
-            if (el) el.classList.remove('yes');
-            el = document.querySelector('.over');
-            if (el) el.classList.remove('over');
-        }
+        if (config.index == -1) return () => clearTimeout(config.timeout);
+        config.timeout = setTimeout(async () => {
+            if (config.toggle) { 
+                if (!config.corrected[config.index] && config.correct)
+                    await axios.get('/api/check/' + answer.id);
+                else if (!config.correct) {
+                    await axios.get('/api/reset/' + answer.id);
+                }
+                config.corrected[config.index] = config.correct;
+            }
+            const newIndex = getIndex(config.corrected, config.index, 1, config.recall);
+            setConfig({
+                index: config.toggle ? newIndex : config.index,
+                toggle: !config.toggle,
+                interval: config.toggle ? 3000 : 1500,
+                src: config.toggle ? 
+                    '/media/word/' + data[newIndex == -1 ? 0 : newIndex].words[0].word + '.mp3':
+                    '/media/word/' + answer.word + '.mp3',
+                yes: -1,
+                no: -1,
+                over: config.toggle ? -1 : words.findIndex((v:any) => v.word == answer.word),
+                corrected: config.corrected,
+                correct: false,
+            })
+        }, config.interval);
+        return () => clearTimeout(config.timeout);
     });
 
-    const move = (val: number) => (e:any) => {
-        if (index + val >= 0 && index + val < study.data.length) {
-            setIndex(index + val);
+    // 기본 화면, 이걸 안해주면 아이폰에서 오디오가 재생되질 않음
+    if (config.index == -1) {
+        clearTimeout(config.timeout);
+        let numTrue, numFalse;
+        if (config.corrected) {
+            numTrue = config.corrected.filter((e:boolean) => e === true).length;
+            numFalse = config.corrected.filter((e:boolean) => e === false).length;
         }
-    };
+        let recall = 0;
+        return <div className="content">
+            {config.corrected ? <div>
+                <span className="left-box">{numTrue}</span>
+                <span> / </span>
+                <span className="right-box">{numFalse}</span>
+            </div> : null}
+            <span>반복 구간</span>
+            <input type="number" onChange={(e:any) => { recall = e.target.value }} />
+            <div>
+                <button onClick={(e:any) => setConfig({
+                    index: 0,
+                    toogle: false,
+                    interval: 3000,
+                    recall,
+                    src: '/media/word/' + data[0].words[0].word + '.mp3',
+                    corrected: config.corrected || new Array(data.length),
+                })}>시작</button>
+            </div>
+        </div>
+    }
 
+    const check = (choosed: any) => (e:any) => {
+        const correct = answer.word == choosed.word;
+        setConfig({
+            toggle: true,
+            interval: correct ? 500 : 1500,
+            src: !correct ? '/media/word/' + answer.word + '.mp3' : null,
+            yes: answer.word == choosed.word ? words.findIndex((v: any) => v.word == choosed.word) : -1,
+            no: answer.word == choosed.word ? -1 : words.findIndex((v: any) => v.word == choosed.word),
+            over: answer.word == choosed.word ? -1 : words.findIndex((v: any) => v.word == answer.word),
+            correct,
+        });
+    }
 
-    const words = study.data[index];
+    const move = (index: number) => (e: any) => {
+        const newIndex = getIndex(config.corrected, config.index, index, config.recall);
+        setConfig({
+            toggle: false,
+            interval: 3000,
+            index: newIndex,
+            recall: config.recall,
+            corrected: config.corrected,
+            src: '/media/word/' + data[newIndex == -1 ? 0 : newIndex].words[0].word + '.mp3',
+        }, {create:true})
+    }
 
-    const check = (q: any, a: any) => (e: any) => {
-        if (lock) return
-        lock = true
-        if (q.category == a.category) { // 반의어가 아니므로 오답
-            e.target.classList.add('no');        
-            (document.querySelector('.ans') as Element).classList.add('over');
-            timeout = setTimeout(() => {
-                axios.get('api/reset/' + a.id).then(data => {
-                    const result = check_can_pass(index, study.data);
-                    if (result) {
-                        setIndex(index + result)
-                    }
-                })
-            }, 500);
-        } else {
-            e.target.classList.add('yes');
-            timeout = setTimeout(() => {
-                axios.get('api/check/' + a.id).then(data => {
-                    const result = check_can_pass(index, study.data);
-                    if (result) {
-                        setIndex(index + result)
-                    }
-                })
-            }, 500);
-        }
-    };
-
-    
-    timeout = setTimeout(() => {
-        if (lock) return;
-        lock = true;
-        (document.querySelector('.ans') as Element).classList.add('over');
-        timeout = setTimeout(() => {
-            let a = words.find((v:any) => v.category != words[0].category);
-            axios.get('api/reset/' + a.id).then(data => {
-                const result = check_can_pass(index, study.data);
-                if (result) {
-                    setIndex(index + result)
-                }
-            })
-        }, 500);
-    }, 3000);
+    let numTrue = config.corrected.filter((e:boolean) => e === true).length;
+    let numFalse = config.corrected.filter((e:boolean) => e === false).length;
 
     return (
         <div className="content">
+            <audio src={config.src} autoPlay={true} style={{display: 'none'}} />
+            <BarContainer>
+                <Bar max={data.length} defaultValue={config.index+1} />
+                <Bar 
+                    key={Date.now()}
+                    effectCallback={(setVal => {
+                        let index = 0;
+                        const d = Date.now();
+                        const step = () => {
+                            setVal([Date.now() - d, config.interval]);
+                            index = requestAnimationFrame(step);
+                        }
+                        index = requestAnimationFrame(step);
+                        return () => cancelAnimationFrame(index);
+                    })}
+                    colorCallback={(val, max) => {
+                        return `rgb(${val / max * 255}, ${255 - val**2 / max**2 * 255}, 0)`
+                    }}
+                />
+            </BarContainer>
+            <div className="left-button" onClick={move(-10)}>{'<<'}</div>
+            <div className="right-button" onClick={move(10)}>{'>>'}</div>
+            <div><span>{config.index + 1} / {data.length}</span></div>
             <div>
-                <button onClick={move(-(index%10 || 10))}>이전</button>
-                <button onClick={move(10-(index%10))}>다음</button>
+                <span className="left-box">{numTrue}</span>
+                <span> / </span>
+                <span className="right-box">{numFalse}</span>
             </div>
-            <h2>{words[0].word}</h2>
-            {words.slice(1).map((v:any) => <h3 key={v.id} className={words[0].category != v.category ? 'ans' : undefined} onClick={check(words[0], v)}>{v.word}</h3>)}
+            <h2>{question.word}</h2>
+            {words.map( (el: any, i: number) => 
+            <h3
+                key={el.id}
+                onClick={check(el)}
+                className={config.yes == i ? 'yes' : config.no == i ? 'no' : config.over == i ? 'over' : undefined }
+            >
+                {el.word}
+            </h3> )}
+            <div>
+                <button onClick={move(-1)}>이전</button>
+                <button onClick={move(1)}>다음</button>
+            </div>
         </div>
     )
 }

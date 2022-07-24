@@ -26,16 +26,6 @@ module.exports = {
         },
         historyApiFallback: true,
     },
-    stats: {
-        // 콘솔 로그를 최소화 합니다
-        assets: false,
-        colors: true,
-        version: false,
-        hash: false,
-        timings: false,
-        chunks: false,
-        chunkModules: false
-    },
     watchOptions: {
         aggregateTimeout: 500, // delay before reloading
         poll: 1000 // enable polling since fsevents are not supported in docker

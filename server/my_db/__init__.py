@@ -100,10 +100,11 @@ class Word :
             {mean} != ?
             AND
             status<2
+        GROUP BY {mean}
         ORDER BY random() 
         LIMIT 4''', (params['start'], params['end'], wordmean)).fetchall()
-        words.insert(random.randint(0, 4), word)
-        return {'word': word, 'words': words}
+        words.insert(random.randint(0, len(words)), word)
+        return {'answer': word, 'words': words}
 
     @connect
     def choose_mean(self, params) :
@@ -139,4 +140,4 @@ class Word :
         # 반의어 찾기(중심 단어가 답), 난이도 쉬움
         words = self.cur.execute('select * from words where class = :class and category != :category order by random() limit 4', word).fetchall()
         words.insert(random.randint(1, 4), word)
-        return words
+        return {'answer': word, 'words': words}

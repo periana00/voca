@@ -7,6 +7,12 @@ export default function Main(props: any) {
 
     const { index } = props;
 
+    
+    useEffect(() => {
+        const el = document.querySelector('.selected');
+        el && el.scrollIntoView({ block: 'center' })
+    }, [index])
+
     const check = (word:any) => (e:any) => {
         if (lock) return
         lock = true
@@ -37,7 +43,7 @@ export default function Main(props: any) {
                 {props.words.map((v:any, i:number) => <tr key={v.id} className={index == i+1 ? 'selected': undefined}>
                     <td className="index">{i+1}</td>
                     <td className={v.status ? "word checked" : "word"} onClick={check(v)}>{v.word}</td>
-                    <td className="mean">{v.bundle || v.mean}</td>
+                    <td className="mean blind">{v.bundle || v.mean}</td>
                 </tr>)}
             </tbody>
         </table>

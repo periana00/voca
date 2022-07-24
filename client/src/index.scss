@@ -23,6 +23,7 @@ button {
     border: none;
     box-sizing:content-box;
     font-size: inherit;
+    -webkit-border-fit:border !important;
 }
 
 #root {

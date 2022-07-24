@@ -4,7 +4,7 @@ import axios from "axios";
 
 
 export default function Footer(props: any) {
-    const { words, index, setIndex } = props;
+    const { audio, words, index, setIndex } = props;
     let lock = false
 
     const move = (offset:number) => (e:any) => {
@@ -33,8 +33,12 @@ export default function Footer(props: any) {
     }
 
     const look = (e:any) => {
-        
-        const audio = document.createElement('audio');
+        const el = document.querySelectorAll('.selected td')[2];
+        el.classList.toggle('blind');
+        setTimeout(() => {
+            el.classList.toggle('blind');
+        }, 1000)
+
         audio.src = '/media/word/' + words[index-1].word + '.mp3';
         audio.play();
     }

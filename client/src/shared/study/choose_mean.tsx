@@ -1,120 +1,147 @@
 import React, { useState, useEffect } from "react";
+import { getIndex, useConfig, Bar, BarContainer } from "../../utils";
 import axios from 'axios';
 
-function check_can_pass(index: number, data: any) {
-    // 10번째 단어가 아니고 마지막 단어도 아닌 경우 1 증가
-    if (index % 10 != 9 && index != data.length - 1) return 1;
-    const start = index - index % 10;
-    const end = index + 1;
-    for (let {word} of data.slice(start, end)) {
-        // 못 맞춘 단어가 있는 경우 10으로 나눈 나머지만큼 감소
-        if (!word.status) return -(index%10);
-    }
-    // 다 맞춘 경우 1 증가, 마지막이면 false 반환
-    return index == data.length - 1 ? false : 1;
-}
-
-
 export default function Choose_mean(props: any) {
-    const { study, index, setIndex } = props;
+    const { data, config, setConfig } = props;
+    const { answer, words } = config.index == -1 ? data[0] : data[config.index];
 
-    let lock = false;
-    let timeout: any = null;
-
+    // 처음 화면(실행) -> 답 보여줌 -> 다음 화면(실행) -> 답 보여줌 -> 다음 화면(실행) -> ....
     useEffect(() => {
-        return () => {
-            clearTimeout(timeout);
-            let el = document.querySelector('.no');
-            if (el) el.classList.remove('no');
-            el = document.querySelector('.yes');
-            if (el) el.classList.remove('yes');
-            el = document.querySelector('.over');
-            if (el) el.classList.remove('over');
-        }
+        if (config.index == -1) return () => clearTimeout(config.timeout);
+        config.timeout = setTimeout(async () => {
+            if (config.toggle) { 
+                if (!config.corrected[config.index] && config.correct)
+                    await axios.get('/api/check/' + answer.id);
+                else if (!config.correct) {
+                    await axios.get('/api/reset/' + answer.id);
+                }
+                config.corrected[config.index] = config.correct;
+            }
+            const newIndex = getIndex(config.corrected, config.index, 1, config.recall);
+            setConfig({
+                index: config.toggle ? newIndex : config.index,
+                toggle: !config.toggle,
+                interval: config.toggle ? 3000 : 1500,
+                src: config.toggle ? '/media/word/' + data[newIndex == -1 ? 0 : newIndex].answer.word + '.mp3' :
+                        answer.bundle ? '/media/bundle/' + answer.bundle + '.mp3' : 
+                            '/media/mean/' + answer.mean.replace(';', ',') + '.mp3',
+                yes: -1,
+                no: -1,
+                over: config.toggle ? -1 : words.findIndex((v:any) => v.word == answer.word),
+                corrected: config.corrected,
+                correct: false,
+            });
+        }, config.interval);
+        return () => clearTimeout(config.timeout);
     })
 
-    const check = (ans: any, word: any) => (e: any) => {
-        if (lock) return;
-        lock=true;
-        clearTimeout(timeout);
-        if (ans.word != word.word) {
-            e.target.classList.add('no');
-            (document.querySelector('.ans') as Element).classList.add('over');
-            (document.querySelector('.voice-mean') as HTMLAudioElement).play();
-            timeout = setTimeout(() => {
-                ans.status = 0;
-                axios.get('api/reset/' + ans.id).then(data => {
-                    const result = check_can_pass(index, study.data)
-                    if (result) {
-                        setIndex(index + result)
-                    } else {
-                        // 끝나고 결과 보여 줘야 함
-                    }
-                })
-            }, 1000)
+    // 기본 화면, 이걸 안해주면 아이폰에서 오디오가 재생되질 않음
+    if (config.index == -1) {
+        clearTimeout(config.timeout);
+        let numTrue, numFalse;
+        if (config.corrected) {
+            numTrue = config.corrected.filter((e:boolean) => e === true).length;
+            numFalse = config.corrected.filter((e:boolean) => e === false).length;
         }
-        else {
-            e.target.classList.add('yes');
-            timeout = setTimeout(() => {
-                if (ans.status < 2) {
-                    ans.status += 1;
-                    axios.get('api/check/' + ans.id).then(data => {
-                        const result = check_can_pass(index, study.data)
-                        if (result) {
-                            setIndex(index + result)
-                        } else {
-                            // 끝나고 결과 보여 줘야 함
-                        }
-                    });
-                } else {
-                    const result = check_can_pass(index, study.data)
-                    if (result) {
-                        setIndex(index + result)
-                    } else {
-                        // 끝나고 결과 보여 줘야 함
-                    }
-                }
-            }, 300)
-        }
+        let recall = 0;
+        return <div className="content">
+            {config.corrected ? <div>
+                <span className="left-box">{numTrue}</span>
+                <span> / </span>
+                <span className="right-box">{numFalse}</span>
+            </div> : null}
+            <span>반복 구간</span>
+            <input type="number" onChange={(e:any) => { recall = e.target.value }} />
+            <div>
+                <button onClick={(e:any) => setConfig({
+                    index: 0,
+                    toogle: false,
+                    interval: 3000,
+                    recall,
+                    src: '/media/word/' + data[0].answer.word + '.mp3',
+                    corrected: config.corrected || new Array(data.length),
+                })}>시작</button>
+            </div>
+        </div>
     }
 
-
-    const {words, word} = study.data[index];
-
-    timeout = setTimeout(() => {
-        lock = true;
-        (document.querySelector('.ans') as Element).classList.add('over');
-        (document.querySelector('.voice-mean') as HTMLAudioElement).play();
-        timeout = setTimeout(() => {
-            word.status = 0;
-            axios.get('api/reset/' + word.id).then(data => {
-                const result = check_can_pass(index, study.data)
-                if (result) {
-                    setIndex(index + result)
-                } else {
-                    // 끝나고 결과 보여 줘야 함
-                }
-            })
-        }, 1000)
-    }, 2500)
-
-    const move = (val: number) => (e:any) => {
-        if (index + val >= 0 && index + val < study.data.length) {
-            setIndex(index + val);
-        }
+    const check = (choosed: any) => (e:any) => { // 색 바꾸기
+        const correct = answer.word == choosed.word;
+        setConfig({
+            toggle: true,
+            interval: correct ? 500 : 1500,
+            src: !correct ?
+                        answer.bundle ? 
+                            '/media/bundle/' + answer.bundle + '.mp3' : 
+                            '/media/mean/' + answer.mean.replace(';', ',') + '.mp3' :
+                        null,
+            yes: correct ? words.findIndex((v: any) => v.word == choosed.word) : -1,
+            no: correct ? -1 : words.findIndex((v: any) => v.word == choosed.word),
+            over: correct ? -1 : words.findIndex((v: any) => v.word == answer.word),
+            correct,
+        });
     }
 
+    const move = (index: number) => (e: any) => { // 인덱스 바꾸기
+        const newIndex = getIndex(config.corrected, config.index, index, config.recall);
+        setConfig({
+            toggle: false,
+            interval: 3000,
+            index: newIndex,
+            recall: config.recall,
+            corrected: config.corrected,
+            src: '/media/word/' + data[newIndex == 1 ? 0 : newIndex].answer.word + '.mp3',
+        }, {create:true})
+    }
+
+    let numTrue = config.corrected.filter((e:boolean) => e === true).length;
+    let numFalse = config.corrected.filter((e:boolean) => e === false).length;
+    let correct = config.corrected[config.index]
 
     return (
         <div className="content">
-            <audio className="voice-word" style={{display:"none"}} src={'/media/word/' + word.word + '.mp3'} autoPlay={true}></audio>
-            <audio className="voice-mean" style={{display:"none"}} src={word.bundle ? '/media/bundle/' + word.bundle + '.mp3' : '/media/mean/' + word.mean + '.mp3'} autoPlay={false}></audio>
+            <audio src={config.src} autoPlay={true} style={{display: 'none'}} />
+            <BarContainer>
+                <Bar max={data.length} defaultValue={config.index+1} />
+                <Bar 
+                    key={Date.now()}
+                    effectCallback={(setVal => {
+                        let index = 0;
+                        const d = Date.now();
+                        const step = () => {
+                            setVal([Date.now() - d, config.interval]);
+                            index = requestAnimationFrame(step);
+                        }
+                        index = requestAnimationFrame(step);
+                        return () => cancelAnimationFrame(index);
+                    })}
+                    colorCallback={(val, max) => {
+                        return `rgb(${val / max * 255}, ${255 - val**2 / max**2 * 255}, 0)`
+                    }}
+                />
+            </BarContainer>
+            <div><span>{config.index + 1} / {data.length}</span></div>
             <div>
-                <button onClick={move(-(index%10 || 10))}>이전</button>
-                <button onClick={move(10-(index%10))}>다음</button>
+                <span className="left-box">{numTrue}</span>
+                <span> / </span>
+                <span className="right-box">{numFalse}</span>
             </div>
-            <h2>{word.word}</h2>
-            {words.map((v:any) => <h3 key={v.id} className={word.word == v.word ? 'ans' : undefined} onClick={check(word, v)}>{v.bundle || v.mean}</h3>)}
+            <div className="left-button" onClick={move(-10)}>{'<<'}</div>
+            <div className="right-button" onClick={move(10)}>{'>>'}</div>
+            <h2 style={{color: correct === true ? 'green' : correct === false ? 'red' : 'black' }}>{answer.word}</h2>
+            {words.map( (word: any, i: number) => 
+            <h3
+                key={word.id}
+                onClick={check(word)}
+                className={config.yes == i ? 'yes' : config.no == i ? 'no' : config.over == i ? 'over' : undefined }
+            >
+                {word.bundle || word.mean}
+            </h3> )}
+            <div>
+                <button onClick={move(-1)}>이전</button>
+                <button onClick={move(1)}>다음</button>
+            </div>
         </div>
     )
 }
