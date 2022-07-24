@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { getIndex, useConfig, Bar, BarContainer } from "../../utils";
+import { getIndex, useConfig } from "../../utils";
+import { Bar, BarContainer } from "../bar";
 import axios from 'axios';
 
 export default function Antonym_word(props: any) {
@@ -104,16 +105,8 @@ export default function Antonym_word(props: any) {
                 <Bar max={data.length} defaultValue={config.index+1} />
                 <Bar 
                     key={Date.now()}
-                    effectCallback={(setVal => {
-                        let index = 0;
-                        const d = Date.now();
-                        const step = () => {
-                            setVal([Date.now() - d, config.interval]);
-                            index = requestAnimationFrame(step);
-                        }
-                        index = requestAnimationFrame(step);
-                        return () => cancelAnimationFrame(index);
-                    })}
+                    max={config.interval}
+                    type="time"
                     colorCallback={(val, max) => {
                         return `rgb(${val / max * 255}, ${255 - val**2 / max**2 * 255}, 0)`
                     }}

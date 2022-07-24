@@ -1,0 +1,29 @@
+.popup-wrapper {
+    position: fixed;
+    top:0;
+    left:0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    z-index: 500;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    .popup-exit {
+        position: absolute;
+        top: 16px;
+        right: 16px;
+        font-size: 20px;
+        display: block;
+        margin-top: auto;
+        border: none;
+        background-color: transparent;
+        color: #ddd;
+    }
+    .popup-window {
+        position: relative;
+        background-color: #fff;
+        margin: auto;
+    }
+}

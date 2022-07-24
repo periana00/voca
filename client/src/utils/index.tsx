@@ -95,3 +95,13 @@ export const getIndex = (corrected: boolean[], index: number, val: number, recal
         return newIndex;
     }
 }
+
+export function FixedWrapper(props: any) {
+    return (
+        <div className="fixed-warrper">
+            {props.children}
+        </div>
+    )
+        
+        
+}
