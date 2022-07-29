@@ -1,10 +1,7 @@
 import React, { useState } from 'react';
 import { Outlet } from "react-router-dom";
-import Header from './header';
-import Main from './main';
-import Footer from './footer';
-import Study from './study';
-import { useConfig } from '../utils';
+import { Header, Main, Footer, Study } from './components';
+import { useConfig } from './utils';
 
 export default function App(props: any) {
     const [words, setWords]: any = useState({config: {start:1, end:1}, words: []});
@@ -18,7 +15,7 @@ export default function App(props: any) {
             <Header config={words.config} setWords={setWords}>
                 <Outlet context={[ words, setWords, study, setStudy ]} />
             </Header>
-            <Main words={words.words} index={index} />
+            <Main words={words.words} config={words.config} index={index} />
             <Footer audio={audio} words={words.words} index={index} setIndex={setIndex} />
         </>
     )

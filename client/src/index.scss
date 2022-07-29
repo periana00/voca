@@ -23,11 +23,11 @@ button {
     border: none;
     box-sizing:content-box;
     font-size: inherit;
+    background-color: inherit;
     -webkit-border-fit:border !important;
 }
 
 #root {
     position:relative;
     width: 100%;
-    height: 100%;
 }

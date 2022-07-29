@@ -1,0 +1,39 @@
+.config {
+    position: relative;
+    box-sizing: border-box;
+    width:80vw;
+    text-align: center;        
+    padding:0.5em 3em;
+
+    display:flex;
+    flex-direction: column;
+    & > * {
+        margin: 0.5em 0;
+    }
+    label, button {
+        display:inline-block;
+    }
+
+    input[type="checkbox"] {
+        display:none;
+
+        & + label {
+            border-radius: 5px;
+            border: 1px solid #aaa;
+            font-size:12px;
+            padding: 1px 6px;
+        }
+
+        &:checked + label {
+            background-color: #aaa;
+        }
+    }
+
+    button {
+        border-radius: 5px;
+        border: 1px solid #aaa;
+        font-size:12px;
+        padding: 1px 6px;
+        margin-right: 0.5em;
+    }
+}

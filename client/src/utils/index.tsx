@@ -83,15 +83,25 @@ export const Bar = (props: {
 export const getIndex = (corrected: boolean[], index: number, val: number, recall: number) => {
     const newIndex = index + val
     if (newIndex < 0) { // 0보다 작으면 첫번째 인덱스로 가기, 원래 인덱스가 0이면 첫 화면으로
-        return index == 0 ? -1 : 0;
+        return 0;
     } else { // 해당 없으면 그냥 반환
         if (recall && val == 1 && (newIndex % recall == 0 || newIndex == corrected.length )) {
             for (let val of corrected.slice(index - index % recall, newIndex)) {
                 if (!val) return index - index % recall;
             }
         } else if (newIndex >= corrected.length) { // 최대 인덱스보다 크면 최대 인덱스, 원래 인덱스가 최대 인덱스인 경우 false
-            return index == corrected.length - 1 ? -1 : corrected.length - 1;
+            return corrected.length - 1;
         }
         return newIndex;
     }
+}
+
+export function FixedWrapper(props: any) {
+    return (
+        <div className="fixed-warrper">
+            {props.children}
+        </div>
+    )
+        
+        
 }

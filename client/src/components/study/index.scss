@@ -1,0 +1,54 @@
+.study {
+    .no { background-color: #f00; }
+    .yes { background-color: #0f0; }
+    .over { background-color: #ff0; }
+
+    .content {
+        position: relative;
+        box-sizing: border-box;
+        width:80vw;
+        text-align: center;        
+        padding:0.5em 3em;
+        .left-box {
+            color: green;
+        }
+        .right-box {
+            color: red;
+        }
+        .left-button {
+            position: absolute;
+            box-sizing: border-box;
+            padding:none;
+            width: 2em;
+            left: 0;
+            top: calc(55% - 2em);
+            height: 4em;
+            line-height: 3.5em;
+            &:active {
+                box-shadow: 0px 0px 5px 0 #aaa;
+            }
+        }
+        .right-button {
+            position: absolute;
+            box-sizing: border-box;
+            padding:none;
+            width: 2em;
+            right: 0;
+            top: calc(55% - 2em);
+            height: 4em;
+            line-height: 3.5em;
+            &:active {
+                box-shadow: 0px 0px 5px 0 #aaa;
+            }
+        }
+        input {
+            border:1px solid #aaa;
+            width: 3em;
+            margin-left:1em;
+        }
+    }
+
+    .toogle {
+        display: none;
+    }
+}
